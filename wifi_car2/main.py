@@ -28,13 +28,15 @@ axies_now = [0,0,0,0]
 button_now = [0,0,0,0,0,0,0,0,0,0,0,0]
 hats_now = (0,0)
 my_ping = 0
-my_x = 790 #590
-my_x_plus = 0
-my_y_plus = 0
-my_y= 390
-my_rel = (0,0)
 my_siz = (1200,800)
 my_siz_org = (1200,800)
+my_x_plus = 410
+my_y_plus = 410
+my_x = my_siz_org[0] - my_x_plus
+my_y = my_siz_org[1] - my_y_plus
+
+my_rel = (0,0)
+
 my_font_title = pygame.font.SysFont("Arial", 28,1,1)
 
 my_title = 'WiFi Robot control  ver1.0'
@@ -78,10 +80,14 @@ while not done:
             my_siz =event.dict['size']
             windows=pygame.display.set_mode(my_siz,HWSURFACE|DOUBLEBUF|RESIZABLE)
 
-            my_x_plus =    my_siz[0] - my_x
-            my_y_plus =    my_siz[1] - my_y
-            my_x += my_x_plus
-            my_y += my_y_plus
+
+            my_x = my_siz[0] - my_x_plus
+            my_y = my_siz[1] - my_y_plus
+
+            print (my_x)
+            print (my_y)
+            #time.sleep(10)
+
     # Get count of joysticks
     joystick_count = pygame.joystick.get_count()
 
@@ -97,7 +103,9 @@ while not done:
         if hendle == True :
             my_rel = pygame.mouse.get_rel()
             my_x = my_x + my_rel[0]
+            my_x_plus -= my_rel[0]
             my_y = my_y + my_rel[1]
+            my_y_plus -= my_rel[1]
     screen.blit(my_art_BG, (my_x,my_y))
 
 
@@ -150,14 +158,14 @@ while not done:
         pygame.draw.rect(window, RED, (77+my_x, 265+my_y, 20 , 20))
          
     screen.blit(my_title_render, (10,10))
-    func.print_value(screen, "Message sent:     "+message, "Arial", 14, WHITE, 370, 10)
+    func.print_value(screen, "Message sent:     "+message, "Arial", 14, WHITE, 370,  10)
     func.print_value(screen, "Message received: "+tm, "Arial", 14, WHITE, 370, 28)
 
-    func.print_value(screen, str(pygame.mouse.get_rel()), "Arial", 14, WHITE, 1100, 50)
-    func.print_value(screen, str(pygame.mouse.get_pos()), "Arial", 14, WHITE, 1100, 65)
+    func.print_value(screen, str(pygame.mouse.get_rel()), "Arial", 14, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 50)
+    func.print_value(screen, str(pygame.mouse.get_pos()), "Arial", 14, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 65)
 
 
-    func.print_value(screen, "PING: "+str( my_ping), "Arial", 15, WHITE, 1000, 80)
+    func.print_value(screen, "PING: "+str( my_ping), "Arial", 15, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 80)
 
     pygame.display.update()
     

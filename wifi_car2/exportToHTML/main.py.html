@@ -1,0 +1,239 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,0,255); }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+main.py</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">import </span><span class="s1">pygame 
+</span><span class="s0">import </span><span class="s1">sys 
+</span><span class="s0">import </span><span class="s1">os 
+</span><span class="s0">import </span><span class="s1">socket 
+</span><span class="s0">import </span><span class="s1">time 
+</span><span class="s0">import </span><span class="s1">func 
+BLACK = (  </span><span class="s2">0</span><span class="s1">,   </span><span class="s2">0</span><span class="s1">,   </span><span class="s2">0</span><span class="s1">) 
+WHITE = (</span><span class="s2">255</span><span class="s1">, </span><span class="s2">255</span><span class="s1">, </span><span class="s2">255</span><span class="s1">) 
+RED   = (</span><span class="s2">255</span><span class="s1">,   </span><span class="s2">0</span><span class="s1">,   </span><span class="s2">0</span><span class="s1">) 
+GREEN = (  </span><span class="s2">0</span><span class="s1">, </span><span class="s2">255</span><span class="s1">,   </span><span class="s2">0</span><span class="s1">) 
+BLUE  = (  </span><span class="s2">0</span><span class="s1">,   </span><span class="s2">0</span><span class="s1">, </span><span class="s2">255</span><span class="s1">) 
+ 
+pygame.init() 
+ 
+</span><span class="s3"># Loop until the user clicks the close button.</span><span class="s1"> 
+done = False 
+ 
+</span><span class="s3"># Used to manage how fast the screen updates</span><span class="s1"> 
+clock = pygame.time.Clock() 
+ 
+</span><span class="s3"># Initialize the joysticks</span><span class="s1"> 
+pygame.joystick.init() 
+message = </span><span class="s4">&quot; &quot;</span><span class="s1"> 
+tm =</span><span class="s4">&quot;NULL&quot;</span><span class="s1"> 
+tmpSTR = </span><span class="s4">&quot;&quot;</span><span class="s1"> 
+axies_now = [</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">] 
+button_now = [</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">] 
+hats_now = (</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">) 
+my_x = </span><span class="s2">790 </span><span class="s3">#590</span><span class="s1"> 
+my_y= </span><span class="s2">390</span><span class="s1"> 
+my_rel = (</span><span class="s2">0</span><span class="s1">,</span><span class="s2">0</span><span class="s1">) 
+my_font_title = pygame.font.SysFont(</span><span class="s4">&quot;Arial&quot;</span><span class="s1">, </span><span class="s2">28</span><span class="s1">,</span><span class="s2">1</span><span class="s1">,</span><span class="s2">1</span><span class="s1">) 
+ 
+my_title = </span><span class="s4">'WiFi Robot control  ver1.0'</span><span class="s1"> 
+my_title_render = my_font_title.render(my_title,</span><span class="s2">1</span><span class="s1">, WHITE) 
+  
+</span><span class="s3"># utworzenie okna</span><span class="s1"> 
+window = pygame.display.set_mode((</span><span class="s2">1200</span><span class="s1">, </span><span class="s2">800</span><span class="s1">)) 
+pygame.mouse.set_visible(</span><span class="s2">1</span><span class="s1">) 
+pygame.event.set_grab(</span><span class="s2">0</span><span class="s1">) 
+ 
+window.fill(BLACK) 
+my_art_BG = pygame.image.load(</span><span class="s4">'background2.png'</span><span class="s1">) 
+</span><span class="s3"># ustawiamy etykiete</span><span class="s1"> 
+pygame.display.set_caption(my_title) 
+</span><span class="s3"># pobieramy informacje o ekranie - tle</span><span class="s1"> 
+screen = pygame.display.get_surface() 
+ 
+</span><span class="s3">#  Start connection</span><span class="s1"> 
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+</span><span class="s3"># get local machine name</span><span class="s1"> 
+</span><span class="s0">if </span><span class="s1">len(sys.argv) &gt;= </span><span class="s2">3 </span><span class="s1">: 
+    host = sys.argv[</span><span class="s2">1</span><span class="s1">] 
+    port = int(sys.argv[</span><span class="s2">2</span><span class="s1">]) 
+    </span><span class="s3">#print(&quot;podales dobre argumenty&quot;)</span><span class="s1"> 
+</span><span class="s0">else</span><span class="s1">: 
+    </span><span class="s0">print</span><span class="s1">(</span><span class="s4">&quot;adres i port domyslny &quot;</span><span class="s1">) 
+    host = </span><span class="s4">&quot;192.168.1.144&quot;</span><span class="s1"> 
+    port = int(</span><span class="s2">8833</span><span class="s1">) 
+</span><span class="s3"># connection to hostname on the port.</span><span class="s1"> 
+s.connect((host, port)) 
+</span><span class="s3"># -------- Main Program Loop -----------</span><span class="s1"> 
+</span><span class="s0">while not </span><span class="s1">done: 
+    </span><span class="s3"># EVENT PROCESSING STEP</span><span class="s1"> 
+    </span><span class="s0">for </span><span class="s1">event </span><span class="s0">in </span><span class="s1">pygame.event.get(): 
+        </span><span class="s0">if </span><span class="s1">event.type == pygame.QUIT: 
+            done = True 
+        </span><span class="s0">elif </span><span class="s1">event.type == pygame.KEYDOWN: 
+            </span><span class="s0">if </span><span class="s1">event.key == pygame.K_ESCAPE: 
+                done = True 
+ 
+    </span><span class="s3"># Get count of joysticks</span><span class="s1"> 
+    joystick_count = pygame.joystick.get_count() 
+ 
+    </span><span class="s3">#print ( &quot;Number of joysticks: %i&quot; %joystick_count)</span><span class="s1"> 
+    window.fill(BLACK) 
+ 
+    </span><span class="s0">if not </span><span class="s1">pygame.mouse.get_pressed()[</span><span class="s2">0</span><span class="s1">]: 
+        hendle = False 
+    </span><span class="s0">if  </span><span class="s1">pygame.mouse.get_pressed()[</span><span class="s2">0</span><span class="s1">]: 
+        </span><span class="s0">if   </span><span class="s1">pygame.mouse.get_pos()[</span><span class="s2">0</span><span class="s1">] &gt; my_x </span><span class="s0">and </span><span class="s1">pygame.mouse.get_pos()[</span><span class="s2">0</span><span class="s1">] &lt; my_x + </span><span class="s2">400 </span><span class="s0">and  </span><span class="s1">pygame.mouse.get_pos()[</span><span class="s2">1</span><span class="s1">] &gt; my_y </span><span class="s0">and   </span><span class="s1">pygame.mouse.get_pos()[</span><span class="s2">1</span><span class="s1">] &lt; my_y +</span><span class="s2">390 </span><span class="s1">: 
+            hendle = True 
+ 
+        </span><span class="s0">if </span><span class="s1">hendle == True : 
+            my_rel = pygame.mouse.get_rel() 
+            my_x = my_x + my_rel[</span><span class="s2">0</span><span class="s1">] 
+            my_y = my_y + my_rel[</span><span class="s2">1</span><span class="s1">] 
+    screen.blit(my_art_BG, (my_x,my_y)) 
+ 
+ 
+ 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">10</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.circle(window, RED, ((int(axies_now[</span><span class="s2">0</span><span class="s1">]) )/</span><span class="s2">10 </span><span class="s1">+my_x+</span><span class="s2">145</span><span class="s1">,(int(axies_now[</span><span class="s2">1</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">310</span><span class="s1">), </span><span class="s2">25</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+    </span><span class="s0">else</span><span class="s1">: 
+        pygame.draw.circle(window, GREEN, ((int(axies_now[</span><span class="s2">0</span><span class="s1">]) )/</span><span class="s2">10 </span><span class="s1">+my_x+</span><span class="s2">145</span><span class="s1">,(int(axies_now[</span><span class="s2">1</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">310</span><span class="s1">), </span><span class="s2">25</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+      
+     
+    func.print_value(screen ,str(axies_now[</span><span class="s2">0</span><span class="s1">]), </span><span class="s4">&quot;Impact&quot;</span><span class="s1">, </span><span class="s2">12</span><span class="s1">, BLUE, (int(axies_now[</span><span class="s2">0</span><span class="s1">]) )/</span><span class="s2">10 </span><span class="s1">+my_x+</span><span class="s2">136</span><span class="s1">, (int(axies_now[</span><span class="s2">1</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">310</span><span class="s1">) 
+    func.print_value(screen ,str(axies_now[</span><span class="s2">1</span><span class="s1">]), </span><span class="s4">&quot;Impact&quot;</span><span class="s1">, </span><span class="s2">12</span><span class="s1">, BLUE, (int(axies_now[</span><span class="s2">0</span><span class="s1">]) )/</span><span class="s2">10 </span><span class="s1">+my_x+</span><span class="s2">140</span><span class="s1">, (int(axies_now[</span><span class="s2">1</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">290</span><span class="s1">) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">11</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        </span><span class="s3">#pygame.draw.circle(window, RED, (  (int(axies_now[2]) )/10+my_x+462, (int(axies_now[3]) )/10+my_y+320), 25, 0)</span><span class="s1"> 
+        pygame.draw.circle(window, RED, (  (int(axies_now[</span><span class="s2">2</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_x+</span><span class="s2">268</span><span class="s1">, (int(axies_now[</span><span class="s2">3</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">311</span><span class="s1">), </span><span class="s2">25</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+    </span><span class="s0">else</span><span class="s1">: 
+        pygame.draw.circle(window, GREEN, (  (int(axies_now[</span><span class="s2">2</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_x+</span><span class="s2">268</span><span class="s1">, (int(axies_now[</span><span class="s2">3</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">311</span><span class="s1">), </span><span class="s2">25</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+         
+    func.print_value(screen ,str(axies_now[</span><span class="s2">2</span><span class="s1">]), </span><span class="s4">&quot;Impact&quot;</span><span class="s1">, </span><span class="s2">12</span><span class="s1">, BLUE, (int(axies_now[</span><span class="s2">2</span><span class="s1">]) )/</span><span class="s2">10 </span><span class="s1">+my_x+</span><span class="s2">262</span><span class="s1">, (int(axies_now[</span><span class="s2">3</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">311</span><span class="s1">) 
+    func.print_value(screen ,str(axies_now[</span><span class="s2">3</span><span class="s1">]), </span><span class="s4">&quot;Impact&quot;</span><span class="s1">, </span><span class="s2">12</span><span class="s1">, BLUE, (int(axies_now[</span><span class="s2">2</span><span class="s1">]) )/</span><span class="s2">10 </span><span class="s1">+my_x+</span><span class="s2">266</span><span class="s1">, (int(axies_now[</span><span class="s2">3</span><span class="s1">]) )/</span><span class="s2">10</span><span class="s1">+my_y+</span><span class="s2">291</span><span class="s1">) 
+    </span><span class="s3"># butons </span><span class="s1"> 
+     
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">0</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">:     </span><span class="s3">#       522 - 205      232 -10</span><span class="s1"> 
+        pygame.draw.circle(window, RED, (   my_x+</span><span class="s2">327</span><span class="s1">, my_y+</span><span class="s2">222</span><span class="s1">), </span><span class="s2">15</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">1</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.circle(window, RED, (   my_x+</span><span class="s2">359</span><span class="s1">, my_y+</span><span class="s2">252</span><span class="s1">), </span><span class="s2">15</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">2</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.circle(window, RED, (   my_x+</span><span class="s2">326</span><span class="s1">, my_y+</span><span class="s2">282</span><span class="s1">), </span><span class="s2">15</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">3</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.circle(window, RED, (   my_x+</span><span class="s2">290</span><span class="s1">, my_y+</span><span class="s2">252</span><span class="s1">), </span><span class="s2">15</span><span class="s1">, </span><span class="s2">0</span><span class="s1">) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">4</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">55</span><span class="s1">+my_x, </span><span class="s2">75</span><span class="s1">+my_y, </span><span class="s2">50 </span><span class="s1">, </span><span class="s2">30</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">5</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">308</span><span class="s1">+my_x, </span><span class="s2">75</span><span class="s1">+my_y, </span><span class="s2">50 </span><span class="s1">, </span><span class="s2">30</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">6</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">59</span><span class="s1">+my_x, </span><span class="s2">20</span><span class="s1">+my_y, </span><span class="s2">50 </span><span class="s1">, </span><span class="s2">40</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">7</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">310</span><span class="s1">+my_x, </span><span class="s2">22</span><span class="s1">+my_y, </span><span class="s2">50 </span><span class="s1">, </span><span class="s2">40</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">8</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">165</span><span class="s1">+my_x, </span><span class="s2">246</span><span class="s1">+my_y, </span><span class="s2">15 </span><span class="s1">, </span><span class="s2">10</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">int(button_now[</span><span class="s2">9</span><span class="s1">]) == </span><span class="s2">1 </span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">231</span><span class="s1">+my_x, </span><span class="s2">246</span><span class="s1">+my_y, </span><span class="s2">15 </span><span class="s1">, </span><span class="s2">10</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">hats_now[</span><span class="s2">0</span><span class="s1">]== -</span><span class="s2">1</span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">55</span><span class="s1">+my_x, </span><span class="s2">242</span><span class="s1">+my_y, </span><span class="s2">20 </span><span class="s1">, </span><span class="s2">20</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">hats_now[</span><span class="s2">0</span><span class="s1">]== </span><span class="s2">1</span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">97</span><span class="s1">+my_x, </span><span class="s2">242</span><span class="s1">+my_y, </span><span class="s2">20 </span><span class="s1">, </span><span class="s2">20</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">hats_now[</span><span class="s2">1</span><span class="s1">]== </span><span class="s2">1</span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">77</span><span class="s1">+my_x, </span><span class="s2">222</span><span class="s1">+my_y, </span><span class="s2">20 </span><span class="s1">, </span><span class="s2">20</span><span class="s1">)) 
+    </span><span class="s0">if </span><span class="s1">hats_now[</span><span class="s2">1</span><span class="s1">]== -</span><span class="s2">1</span><span class="s1">: 
+        pygame.draw.rect(window, RED, (</span><span class="s2">77</span><span class="s1">+my_x, </span><span class="s2">265</span><span class="s1">+my_y, </span><span class="s2">20 </span><span class="s1">, </span><span class="s2">20</span><span class="s1">)) 
+          
+    screen.blit(my_title_render, (</span><span class="s2">10</span><span class="s1">,</span><span class="s2">10</span><span class="s1">)) 
+    func.print_value(screen, </span><span class="s4">&quot;Message sent:     &quot;</span><span class="s1">+message, </span><span class="s4">&quot;Arial&quot;</span><span class="s1">, </span><span class="s2">11</span><span class="s1">, WHITE, </span><span class="s2">550</span><span class="s1">, </span><span class="s2">10</span><span class="s1">) 
+    func.print_value(screen, </span><span class="s4">&quot;Message received: &quot;</span><span class="s1">+tm, </span><span class="s4">&quot;Arial&quot;</span><span class="s1">, </span><span class="s2">11</span><span class="s1">, WHITE, </span><span class="s2">550</span><span class="s1">, </span><span class="s2">25</span><span class="s1">) 
+ 
+    func.print_value(screen, str(pygame.mouse.get_rel()), </span><span class="s4">&quot;Arial&quot;</span><span class="s1">, </span><span class="s2">11</span><span class="s1">, WHITE, </span><span class="s2">1100</span><span class="s1">, </span><span class="s2">50</span><span class="s1">) 
+    func.print_value(screen, str(pygame.mouse.get_pos()), </span><span class="s4">&quot;Arial&quot;</span><span class="s1">, </span><span class="s2">11</span><span class="s1">, WHITE, </span><span class="s2">1100</span><span class="s1">, </span><span class="s2">60</span><span class="s1">) 
+    pygame.display.update() 
+     
+    </span><span class="s3"># For each joystick:</span><span class="s1"> 
+    </span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(joystick_count): 
+        joystick = pygame.joystick.Joystick(i) 
+        joystick.init() 
+ 
+        message=</span><span class="s4">&quot;joy:&quot;</span><span class="s1">+ str(i)+</span><span class="s4">&quot;;&quot;</span><span class="s1"> 
+        </span><span class="s3"># Get the name from the OS for the controller/joystick</span><span class="s1"> 
+        name = joystick.get_name() 
+        </span><span class="s3">#print(&quot;Joystick name: %s&quot; %name)</span><span class="s1"> 
+ 
+        </span><span class="s3"># Usually axis run in pairs, up/down for one, and left/right for</span><span class="s1"> 
+        </span><span class="s3"># the other.</span><span class="s1"> 
+        axes = joystick.get_numaxes() 
+        </span><span class="s3">#print (  &quot;Number of axes: %i&quot; %axes)</span><span class="s1"> 
+        message +=</span><span class="s4">&quot;axes&quot;</span><span class="s1"> 
+        </span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(axes): 
+            axis = joystick.get_axis(i) 
+            message +=</span><span class="s4">&quot;:&quot;</span><span class="s1"> 
+            tmpSTR = axies_now[i]= str(int(axis *</span><span class="s2">255.6</span><span class="s1">)) 
+             
+            </span><span class="s0">while </span><span class="s1">len(tmpSTR) &lt; </span><span class="s2">4</span><span class="s1">: 
+                tmpSTR+=</span><span class="s4">&quot; &quot;</span><span class="s1"> 
+            message += tmpSTR 
+            </span><span class="s3">#print (&quot;warotsc z axis 0 : %f&quot; %joystick.get_axis(i))</span><span class="s1"> 
+            </span><span class="s3">#print (&quot; &quot;)</span><span class="s1"> 
+ 
+ 
+        buttons = joystick.get_numbuttons() 
+        </span><span class="s3">#print ( &quot;Number of buttons: %i &quot;%buttons)</span><span class="s1"> 
+ 
+        message+=</span><span class="s4">&quot;;button&quot;</span><span class="s1"> 
+        </span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(buttons): 
+            button = joystick.get_button(i) 
+            </span><span class="s3">#print ( &quot;Button %i&quot; %i )</span><span class="s1"> 
+            </span><span class="s3">#print (&quot; value: %s &quot; %button)</span><span class="s1"> 
+            button_now[i]= button 
+            message+=</span><span class="s4">&quot;:&quot;</span><span class="s1">+str(i)+</span><span class="s4">&quot;=&quot;</span><span class="s1">+str(button) 
+        </span><span class="s3"># Hat switch. All or nothing for direction, not like joysticks.</span><span class="s1"> 
+        </span><span class="s3"># Value comes back in an array.</span><span class="s1"> 
+        hats = joystick.get_numhats() 
+        </span><span class="s3">#print ( &quot;Number of hats: %i&quot; %hats)</span><span class="s1"> 
+ 
+        message+=</span><span class="s4">&quot;;hats&quot;</span><span class="s1"> 
+        </span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(hats): 
+            hat = joystick.get_hat(i) 
+            </span><span class="s3">#print (  &quot;Hat %i &quot; %i )</span><span class="s1"> 
+            </span><span class="s3">#print (&quot; value: %s &quot; %str(hat))</span><span class="s1"> 
+            hats_now = hat 
+            message+=</span><span class="s4">&quot;:&quot;</span><span class="s1">+str(i)+</span><span class="s4">&quot;=&quot;</span><span class="s1">+str(hat) 
+ 
+        message+=</span><span class="s4">&quot;;END&quot;</span><span class="s1"> 
+    </span><span class="s3"># ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT</span><span class="s1"> 
+ 
+    </span><span class="s3"># Go ahead and update the screen with what we've drawn.</span><span class="s1"> 
+ 
+ 
+    </span><span class="s3"># Limit to 60 frames per second</span><span class="s1"> 
+    </span><span class="s0">print </span><span class="s1">(message) 
+    </span><span class="s0">print </span><span class="s1">(</span><span class="s4">&quot;wielkosc %i&quot; </span><span class="s1">%len(message)) 
+    s.send (message) 
+    </span><span class="s0">print</span><span class="s1">(</span><span class="s4">&quot; odbieramy&quot;</span><span class="s1">) 
+     
+    tm = s.recv(</span><span class="s2">256</span><span class="s1">) 
+    </span><span class="s0">print </span><span class="s1">(</span><span class="s4">&quot;odebrano: &quot;</span><span class="s1">) 
+    </span><span class="s3">#print(tm)</span><span class="s1"> 
+    clock.tick(</span><span class="s2">30</span><span class="s1">) 
+ 
+</span><span class="s3"># Close the window and quit.</span><span class="s1"> 
+</span><span class="s3"># If you forget this line, the program will 'hang'</span><span class="s1"> 
+</span><span class="s3"># on exit if running from IDLE.</span><span class="s1"> 
+pygame.quit()</span></pre>
+</body>
+</html>

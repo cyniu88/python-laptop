@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 import sys
 import os
 import socket
@@ -26,16 +27,21 @@ tmpSTR = ""
 axies_now = [0,0,0,0]
 button_now = [0,0,0,0,0,0,0,0,0,0,0,0]
 hats_now = (0,0)
+my_ping = 0
 my_x = 790 #590
+my_x_plus = 0
+my_y_plus = 0
 my_y= 390
 my_rel = (0,0)
+my_siz = (1200,800)
+my_siz_org = (1200,800)
 my_font_title = pygame.font.SysFont("Arial", 28,1,1)
 
 my_title = 'WiFi Robot control  ver1.0'
 my_title_render = my_font_title.render(my_title,1, WHITE)
  
 # utworzenie okna
-window = pygame.display.set_mode((1200, 800))
+window = pygame.display.set_mode(my_siz_org,HWSURFACE|DOUBLEBUF|RESIZABLE)
 pygame.mouse.set_visible(1)
 pygame.event.set_grab(0)
 
@@ -68,7 +74,14 @@ while not done:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 done = True
+        elif event.type==VIDEORESIZE:
+            my_siz =event.dict['size']
+            windows=pygame.display.set_mode(my_siz,HWSURFACE|DOUBLEBUF|RESIZABLE)
 
+            my_x_plus =    my_siz[0] - my_x
+            my_y_plus =    my_siz[1] - my_y
+            my_x += my_x_plus
+            my_y += my_y_plus
     # Get count of joysticks
     joystick_count = pygame.joystick.get_count()
 
@@ -137,11 +150,15 @@ while not done:
         pygame.draw.rect(window, RED, (77+my_x, 265+my_y, 20 , 20))
          
     screen.blit(my_title_render, (10,10))
-    func.print_value(screen, "Message sent:     "+message, "Arial", 11, WHITE, 550, 10)
-    func.print_value(screen, "Message received: "+tm, "Arial", 11, WHITE, 550, 25)
+    func.print_value(screen, "Message sent:     "+message, "Arial", 14, WHITE, 370, 10)
+    func.print_value(screen, "Message received: "+tm, "Arial", 14, WHITE, 370, 28)
 
-    func.print_value(screen, str(pygame.mouse.get_rel()), "Arial", 11, WHITE, 1100, 50)
-    func.print_value(screen, str(pygame.mouse.get_pos()), "Arial", 11, WHITE, 1100, 60)
+    func.print_value(screen, str(pygame.mouse.get_rel()), "Arial", 14, WHITE, 1100, 50)
+    func.print_value(screen, str(pygame.mouse.get_pos()), "Arial", 14, WHITE, 1100, 65)
+
+
+    func.print_value(screen, "PING: "+str( my_ping), "Arial", 15, WHITE, 1000, 80)
+
     pygame.display.update()
     
     # For each joystick:
@@ -203,10 +220,13 @@ while not done:
     # Limit to 60 frames per second
     print (message)
     print ("wielkosc %i" %len(message))
+    my_ping = int(round(time.time() * 1000))
     s.send (message)
     print(" odbieramy")
     
     tm = s.recv(256)
+    my_ping -= int(round(time.time() * 1000))
+    my_ping *=-1
     print ("odebrano: ")
     #print(tm)
     clock.tick(30)

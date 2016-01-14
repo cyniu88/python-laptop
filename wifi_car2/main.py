@@ -1,3 +1,4 @@
+# -*- coding: cp1252 -*-
 import pygame
 from pygame.locals import *
 import sys
@@ -5,12 +6,15 @@ import os
 import socket
 import time
 import func
+import c_connect 
+import Buttons
+ 
+
 BLACK = (  0,   0,   0)
 WHITE = (255, 255, 255)
 RED   = (255,   0,   0)
 GREEN = (  0, 255,   0)
 BLUE  = (  0,   0, 255)
-
 pygame.init()
 
 # Loop until the user clicks the close button.
@@ -39,6 +43,7 @@ my_rel = (0,0)
 
 my_font_title = pygame.font.SysFont("Arial", 28,1,1)
 
+my_connection_status = " "
 my_title = 'WiFi Robot control  ver1.0'
 my_title_render = my_font_title.render(my_title,1, WHITE)
  
@@ -48,14 +53,38 @@ pygame.mouse.set_visible(1)
 pygame.event.set_grab(0)
 
 window.fill(BLACK)
-my_art_BG = pygame.image.load('background2.png')
 # ustawiamy etykiete
 pygame.display.set_caption(my_title)
 # pobieramy informacje o ekranie - tle
 screen = pygame.display.get_surface()
 
+while not done:
+    # EVENT PROCESSING STEP
+     
+    func.print_value(screen ,"Press SPACE to START", "Impact", 90, WHITE, 200, 200)
+    pygame.display.update()
+    
+    func.print_value(screen ,"Press SPACE to START", "Impact", 90, RED, 200, 200)
+    pygame.display.update()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                # on exit if running from IDLE.
+                pygame.quit()
+                sys.exit()
+            elif  event.key == pygame.K_SPACE:
+                done = True
+
+
+my_art_BG = pygame.image.load('background2.png')
+
+
 #  Start connection
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # get local machine name
 if len(sys.argv) >= 3 :
     host = sys.argv[1]
@@ -66,8 +95,15 @@ else:
     host = "192.168.1.144"
     port = int(8833)
 # connection to hostname on the port.
-s.connect((host, port))
+#s.connect((host, port))
+my_connect =  c_connect.c_connect()
+my_connection_status = my_connect.connect_to(host, port)
+button_connect = Buttons.Button()
+button_connect_pos = [my_siz[0]- 130 ,110]
+button_disconnect = Buttons.Button()
+button_disconnect_pos = [my_siz[0]- 130 ,170]
 # -------- Main Program Loop -----------
+done = False
 while not done:
     # EVENT PROCESSING STEP
     for event in pygame.event.get():
@@ -79,15 +115,23 @@ while not done:
         elif event.type==VIDEORESIZE:
             my_siz =event.dict['size']
             windows=pygame.display.set_mode(my_siz,HWSURFACE|DOUBLEBUF|RESIZABLE)
-
-
             my_x = my_siz[0] - my_x_plus
             my_y = my_siz[1] - my_y_plus
-
+            button_connect_pos[0] = my_siz[0]- 130
+            button_disconnect_pos[0] = my_siz[0]- 130
             print (my_x)
             print (my_y)
-            #time.sleep(10)
-
+        elif event.type == MOUSEBUTTONDOWN:
+                if button_connect.pressed(pygame.mouse.get_pos()):   
+                    button_connect.create_button(screen,BLUE, button_connect_pos[0], button_connect_pos[1], 110, 50, 10, "CONNECT", BLACK)
+                    pygame.display.update()
+                    if my_connect.is_work() == False:
+                        my_connection_status = my_connect.connect_to(host,port)
+                elif button_disconnect.pressed(pygame.mouse.get_pos()):   
+                    button_disconnect.create_button(screen,BLUE, button_disconnect_pos[0], button_disconnect_pos[1], 110, 50, 10, "DISCONNECT", BLACK)
+                    pygame.display.update()
+                    if my_connect.is_work() == True:
+                        my_connection_status = my_connect.disconnect_now()
     # Get count of joysticks
     joystick_count = pygame.joystick.get_count()
 
@@ -164,9 +208,11 @@ while not done:
     func.print_value(screen, str(pygame.mouse.get_rel()), "Arial", 14, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 50)
     func.print_value(screen, str(pygame.mouse.get_pos()), "Arial", 14, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 65)
 
-
+    func.print_value(screen, "CONNECTION: "+str(my_connection_status), "Arial", 12, WHITE,    10, 50)
     func.print_value(screen, "PING: "+str( my_ping), "Arial", 15, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 80)
-
+    #buttony
+    button_connect.create_button(screen,WHITE, button_connect_pos[0], button_connect_pos[1], 110, 50, 10, "CONNECT", BLACK)
+    button_disconnect.create_button(screen,WHITE, button_disconnect_pos[0], button_disconnect_pos[1], 110, 50, 10, "DISCONNECT", BLACK)
     pygame.display.update()
     
     # For each joystick:
@@ -229,14 +275,14 @@ while not done:
     print (message)
     print ("wielkosc %i" %len(message))
     my_ping = int(round(time.time() * 1000))
-    s.send (message)
+    my_connect.send(message)
     print(" odbieramy")
     
-    tm = s.recv(256)
+    tm = my_connect.recv(256)
     my_ping -= int(round(time.time() * 1000))
     my_ping *=-1
     print ("odebrano: ")
-    #print(tm)
+    print(tm)
     clock.tick(30)
 
 # Close the window and quit.

@@ -94,14 +94,22 @@ else:
     print("adres i port domyslny ")
     host = "192.168.1.144"
     port = int(8833)
+host_set = False
+port_set = False
 # connection to hostname on the port.
 #s.connect((host, port))
 my_connect =  c_connect.c_connect()
-my_connection_status = my_connect.connect_to(host, port)
+my_connection_status = "NOT CONNECTED"
 button_connect = Buttons.Button()
 button_connect_pos = [my_siz[0]- 130 ,110]
 button_disconnect = Buttons.Button()
 button_disconnect_pos = [my_siz[0]- 130 ,170]
+dialog_box_host = Buttons.dialog_box()
+dialog_box_host_pos = [my_siz[0]-300 ,300,300,30]
+dialog_box_host_color = RED
+dialog_box_port = Buttons.dialog_box()
+dialog_box_port_pos = [my_siz[0]-200,340,150,30]
+dialog_box_port_color = RED
 # -------- Main Program Loop -----------
 done = False
 while not done:
@@ -112,6 +120,12 @@ while not done:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 done = True
+            if host_set == True:
+                if event.key == pygame.K_BACKSPACE and len(host) > 0:
+                    host[len(host)-1]
+                    print host
+                    time.sleep(3)
+
         elif event.type==VIDEORESIZE:
             my_siz =event.dict['size']
             windows=pygame.display.set_mode(my_siz,HWSURFACE|DOUBLEBUF|RESIZABLE)
@@ -119,6 +133,8 @@ while not done:
             my_y = my_siz[1] - my_y_plus
             button_connect_pos[0] = my_siz[0]- 130
             button_disconnect_pos[0] = my_siz[0]- 130
+            dialog_box_host_pos[0] = my_siz[0] -300
+            dialog_box_port_pos[0] = my_siz[0] -200
             print (my_x)
             print (my_y)
         elif event.type == MOUSEBUTTONDOWN:
@@ -132,6 +148,12 @@ while not done:
                     pygame.display.update()
                     if my_connect.is_work() == True:
                         my_connection_status = my_connect.disconnect_now()
+                elif dialog_box_host.pressed(pygame.mouse.get_pos()) and port_set == False:
+                     host_set = True
+                     dialog_box_host_color = GREEN
+                elif dialog_box_port.pressed(pygame.mouse.get_pos()) and host_set == False:
+                     port_set =True
+                     dialog_box_port_color = GREEN
     # Get count of joysticks
     joystick_count = pygame.joystick.get_count()
 
@@ -213,6 +235,9 @@ while not done:
     #buttony
     button_connect.create_button(screen,WHITE, button_connect_pos[0], button_connect_pos[1], 110, 50, 10, "CONNECT", BLACK)
     button_disconnect.create_button(screen,WHITE, button_disconnect_pos[0], button_disconnect_pos[1], 110, 50, 10, "DISCONNECT", BLACK)
+    #dialog box
+    dialog_box_host.draw_box(dialog_box_host_pos,dialog_box_host_color,WHITE,"HOST: "+host,screen)
+    dialog_box_port.draw_box(dialog_box_port_pos,dialog_box_port_color,WHITE,"PORT: "+str(port),screen)
     pygame.display.update()
     
     # For each joystick:

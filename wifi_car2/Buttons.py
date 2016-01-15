@@ -5,6 +5,8 @@
 #Project startet: d. 26. august 2012
 import pygame
 from pygame.locals import *
+import func
+import time
 pygame.init()
 class Button:
     def create_button(self, surface, color, x, y, length, height, width, text, text_color):
@@ -45,3 +47,26 @@ class Button:
                 else: return False
             else: return False
         else: return False
+
+class dialog_box:
+
+    def __init__(self):
+        print " tworze obietk"
+    def __enter__(self):
+        print "kasuje obiekt"
+    def draw_box (self,wher,color,color_txt,text,screen):
+        self.rect = pygame.draw.rect(screen,color, wher)
+        func.print_value(screen,text,"Arial",wher[3] -(wher[3]/8),color_txt,wher[0],wher[1])
+    def pressed(self, mouse):
+        if mouse[0] > self.rect.topleft[0]:
+            if mouse[1] > self.rect.topleft[1]:
+                if mouse[0] < self.rect.bottomright[0]:
+                    if mouse[1] < self.rect.bottomright[1]:
+                        print "wpisz hosta!"
+
+                        return True
+                    else: return False
+                else: return False
+            else: return False
+        else: return False
+

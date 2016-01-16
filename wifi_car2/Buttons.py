@@ -69,4 +69,3 @@ class dialog_box:
                 else: return False
             else: return False
         else: return False
-

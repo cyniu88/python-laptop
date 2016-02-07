@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;WiFi_car/main.py&apos;" deleteContents="false" description="Delete resource &apos;WiFi_car/main.py&apos;" element1="/WiFi_car/main.py" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1451898845050"/>
+</session>

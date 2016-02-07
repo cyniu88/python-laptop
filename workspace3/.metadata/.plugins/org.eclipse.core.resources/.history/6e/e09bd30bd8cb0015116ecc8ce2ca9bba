@@ -1,0 +1,5 @@
+#!/usr/bin/python
+from PIL import Image
+
+img = Image.open("HD.jpg")
+img.show()

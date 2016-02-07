@@ -1,0 +1,9 @@
+INSTUPfunc
+D:\workspace3\WiFi_car\scr\func.py
+INFOS:&&3|1|2|0&&2|3|2|0&&2|4|2|0&&2|5|2|0&&2|6|2|0
+c_queue=1
+func=2
+extractIP=4
+find_server=5
+find_ip_start=6
+print_value=3

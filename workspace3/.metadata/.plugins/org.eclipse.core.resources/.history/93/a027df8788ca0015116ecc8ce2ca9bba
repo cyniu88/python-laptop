@@ -1,0 +1,118 @@
+# -*- coding: utf-8 -*-
+import socket
+import time
+from _socket import SHUT_RDWR
+class c_connect :
+    c_socket = 0                # nasze gniazdo  narazie "puste"
+    work = False                # zminanna trzymajaca stan  polaczony/ nie polaczony
+    # " konstruktor"
+    def __init__(self):
+        print "tworze obiekt do polaczenia"
+   
+    # "destruktor"
+    def __del__(self):
+        print "obiekt niszczony"
+
+     # sprawdza stan  czy poalczony czy nie 
+    def is_work(self):
+        return self.work
+    
+    # wysylanie 
+    def send (self,c_msg):
+        # jezeli jest  polaczony  to wysylam 
+        if self.work == True:
+            return self.c_socket.send(c_msg)
+        else:
+            return 0
+        
+    # odbieranie
+    def recv (self,size):
+        # jezeli jest polaczony to odbieraj 
+        if self.work == True:
+            return self.c_socket.recv(size)
+        else:
+            return "NULL"
+        
+    # polacz do serwera 
+    def connect_to (self,host, port):
+       
+        self.c_socket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+       
+        try:
+            self.c_socket.connect((host,port))
+        except socket.error, msg :
+       
+            self.work = False
+            return  str(msg[0]) +" "+ unicode(msg[1], "windows-1250")
+        # zmina flagi na polacozny 
+        self.work=True
+        return "OK - HOST: "+host
+    
+    # odlacz sie 
+    def disconnect_now (self):      
+        # wysyalnie wiadomosci do serwera  ze sie odlaczamy  ( ma to znacznie dla serwera na ESP266  i Arduino 
+        self.send("DISCONNECT#")
+        # zamkniecie gniazda 
+        self.c_socket.shutdown(SHUT_RDWR)
+        # zmina flagi na  odlaczony 
+        self.work = False
+        return "DISCONNECTED"
+
+############################################################################################
+class c_connect_UDP :
+    c_socket = 0                # nasze gniazdo  narazie "puste"
+    work = False                # zminanna trzymajaca stan  polaczony/ nie polaczony
+    # " konstruktor"
+    def __init__(self):
+        print "tworze obiekt do polaczenia"
+   
+    # "destruktor"
+    def __del__(self):
+        print "obiekt niszczony"
+
+     # sprawdza stan  czy poalczony czy nie 
+    def is_work(self):
+        return self.work
+    
+    # wysylanie 
+    def send (self,c_msg,c_host,c_port):
+        # jezeli jest  polaczony  to wysylam 
+        if self.work == True:
+            return self.c_socket.sendto(c_msg, (c_host,c_port))
+        else:
+            return 0
+        
+    # odbieranie
+    def recv (self,size):
+        # jezeli jest polaczony to odbieraj 
+        if self.work == True:
+            # self.c_socket.recv(size)
+            data, addr = self.c_socket.recvfrom(size) # sock.recvfrom(1024) # buffer size is 1024 bytes
+            print "received message:", data
+        else:
+            return "NULL"
+        
+    # polacz do serwera 
+    def connect_to (self,host, port):
+       
+        
+       
+        try:
+            self.c_socket =  socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        except socket.error, msg :
+       
+            self.work = False
+            return  str(msg[0]) +" "+ unicode(msg[1], "windows-1250")
+        # zmina flagi na polacozny 
+        self.work=True
+        return "OK - HOST: "+host
+    
+    # odlacz sie 
+    def disconnect_now (self,host,port):      
+        # wysyalnie wiadomosci do serwera  ze sie odlaczamy  ( ma to znacznie dla serwera na ESP266  i Arduino 
+        self.sendto("DISCONNECT#",(host,port))
+        # zamkniecie gniazda 
+        self.c_socket.shutdown(SHUT_RDWR)
+        # zmina flagi na  odlaczony 
+        self.work = False
+        return "DISCONNECTED"

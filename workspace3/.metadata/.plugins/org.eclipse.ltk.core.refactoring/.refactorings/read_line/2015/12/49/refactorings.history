@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;read_line/src/main.pyton&apos; to &apos;main.py&apos;" description="Rename resource &apos;main.pyton&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/main.pyton" name="main.py" stamp="1449128509010" updateReferences="true"/>
+</session>

@@ -1,0 +1,65 @@
+#!/usr/bin/python
+import socket
+import re
+import sys
+import threading
+import Queue
+lista= [0]
+lista.append([5,6,7])
+lista.reverse()
+print lista
+
+sys.exit()
+c_queue= Queue.Queue(2)
+print "c_queue jest"
+print c_queue.empty()
+if len(sys.argv) >= 2 :
+    print sys.argv[1]
+    port = sys.argv[1]
+else:
+    port = 8833
+def extractIP( ipStr):
+     
+    l = re.split('(.*)\.(.*)\.(.*)\.(.*)', ipStr)
+    print str(l[1]+"."+l[2]+"."+l[3]+".")
+    return str(l[1]+"."+l[2]+"."+l[3]+".")
+
+def find_server (start, stop, host, port ):
+    full_host = ""
+    c_socket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    #print "zasieg: " + str(start) + " " + str(stop)
+    for x in range(start,stop):
+        full_host = host + str(x)
+        if c_queue.empty() == False:
+            break
+        #print full_host
+        try:
+            c_socket.connect((full_host,port))
+        except socket.error, msg : 
+            #print full_host+" " + str( msg[0]) +" "+ unicode(msg[1], "windows-1250")
+            continue
+        else:
+            c_queue.put(full_host)
+            print "OK - HOST: "+full_host
+            return "OK - HOST: "+full_host
+    #print "KONIEC!!: " + str(start) + " " + str(stop)
+    return "NOT FOUND" 
+ 
+ 
+    
+adres = extractIP(str(socket.gethostbyname(socket.gethostname()))) 
+#adres = extractIP(str(socket.gethostbyname("cyniu88.no-ip.pl")))
+c_thread = [0]   
+c_thread[0] = threading.Thread(target = find_server , args = (251,255,adres, port ))
+c_thread[0].start() 
+for num in range(1, 26):
+    c_thread.extend("0")
+    c_thread[num] = threading.Thread(target = find_server , args = ((num-1)*10+1,num*10,adres, port ))
+    c_thread[num].start()
+    
+for num in range(0, 26):
+    c_thread[num].join()
+print c_queue.get(0)    
+print "koniec!!!"
+    

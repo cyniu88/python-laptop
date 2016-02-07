@@ -1,0 +1,56 @@
+Exception in thread Thread-1:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 296, in run
+IOError: [Errno 2] No such file or directory: 'screen.txt'
+
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 218, in run
+NameError: global name 'show' is not defined
+
+Exception in thread Thread-3:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 218, in run
+NameError: global name 'show' is not defined
+
+Exception in thread Thread-4:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 218, in run
+NameError: global name 'show' is not defined
+
+Exception in thread Thread-5:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 296, in run
+IOError: [Errno 2] No such file or directory: 'screen.txt'
+
+Exception in thread Thread-6:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 296, in run
+IOError: [Errno 2] No such file or directory: 'screen.txt'
+
+Exception in thread Thread-7:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 296, in run
+IOError: [Errno 2] No such file or directory: 'screen.txt'
+
+Exception in thread Thread-8:
+Traceback (most recent call last):
+  File "threading.pyc", line 442, in __bootstrap
+  File "threading.pyc", line 422, in run
+  File "data\build.pyc", line 296, in run
+IOError: [Errno 2] No such file or directory: 'screen.txt'
+

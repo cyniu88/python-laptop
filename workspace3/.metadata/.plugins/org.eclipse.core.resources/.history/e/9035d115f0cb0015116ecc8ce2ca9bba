@@ -1,0 +1,36 @@
+import socket
+import time
+import sys
+UDP_IP = "127.0.0.1"
+UDP_PORT = 8834
+
+max_size_pocket = 64000
+
+sock = socket.socket(socket.AF_INET, # Internet
+                     socket.SOCK_DGRAM) # UDP
+sock.bind((UDP_IP, UDP_PORT))
+
+while True:
+    _file = open('HD.jpg','rb')
+    fp = _file.read()
+    _file.close()
+    #print fp
+    foto_len = len(fp)
+    foto_len_tmp = 0 #foto_len
+    print "dlugosc to : ",foto_len
+    while True:
+        data, addr = sock.recvfrom(max_size_pocket) # buffer size is 1024 bytes
+        print "received message:", data," from: " , addr
+        #time.sleep(1)
+        print " loop"
+        if foto_len_tmp+max_size_pocket < foto_len:
+            print "wysylam zawartosc",foto_len_tmp, " ", foto_len_tmp+max_size_pocket
+            sock.sendto(fp[foto_len_tmp:foto_len_tmp+max_size_pocket], addr)
+            foto_len_tmp = foto_len_tmp + max_size_pocket
+            print "wysylam zawartosc"
+        else :
+            sock.sendto(fp[foto_len_tmp:foto_len], addr)
+            print " ostatnia paczka"
+            break
+    data, addr = sock.recvfrom(max_size_pocket) # buffer size is 1024 bytes
+    sock.sendto("END#", addr)

@@ -1,0 +1,52 @@
+#-*-coding:utf8;-*-
+#qpy:2
+#qpy:console
+
+print "This is console module"
+# Importing PyGame library
+
+import pygame
+from pygame import *
+#Declaring variables
+
+window_width = 800 #Width of game window
+window_height = 640 # heigh
+screen = (window_width, window_height) #Grouping W and H into a single variable 
+
+bg_color = (0,0,255) #setting background color
+
+ 
+
+def main(): #main function start
+
+    pygame.init() # PyGame initialization (all pygame projects requires this)  
+
+    window = pygame.display.set_mode(screen) #Let's create a window
+
+    pygame.display.set_caption("Platform Game") # Windows title
+
+    bg = Surface((window_width,window_height)) # Creating a visible surface to use as background 
+
+    bg.fill(bg_color) #and fill it with bg_color color (white)    
+
+    while True: # Main Game cycle,  True' means it will run without stop forever
+
+        for event in pygame.event.get(): # Handling quit event
+
+            if event.type == QUIT:
+
+                raise SystemExit("QUIT") # raise SystemExit, "QUIT" for Py 2.7
+
+        window.blit(bg, (0,0))      # We need to redraw screen each cycle iteration
+        pygame.draw.circle(bg, (255,203,100), (100,100), 90,1 )
+        pygame.display.update()     # drawing everything after each iteration
+
+ 
+
+ 
+
+if __name__ == "__main__":
+
+    main() #executing main function
+
+

@@ -1,0 +1,27 @@
+-- VERSION_4
+-- START DISKCACHE_2
+D:\workspace3\.metadata\.plugins\org.eclipse.core.resources\.projects\read_line\com.python.pydev.analysis\v2_indexcache
+gra|1454670235284392000|D:\workspace3\read_line\src\gra.py
+main|1454656485760558000|D:\workspace3\read_line\src\main.py
+send|1454496057995240000|D:\workspace3\read_line\src\send.py
+-- END DISKCACHE
+-- START DICTIONARY
+2
+1=gra
+2=send
+-- END DICTIONARY
+-- START TREE 1
+9
+_fi|1|_file!11@
+fot|2|foto_len_tmp!11@foto_len!11@
+fp|1|fp!11@
+max|1|max_size_pocket!11@
+msg|1|msg!11@
+soc|1|sock!11@
+udp|2|UDP_IP!11@UDP_PORT!11@
+vid|1|video_send!18@
+wor|1|work!11@
+-- END TREE
+-- START TREE 2
+0
+-- END TREE

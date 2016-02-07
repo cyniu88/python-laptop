@@ -1,0 +1,360 @@
+# -*- coding: utf-8 -*-
+import pygame
+from pygame.locals import *
+import sys
+import time
+import func
+import c_connect
+import Buttons
+import threading
+ 
+
+# kolory
+BLACK = (  0,   0,   0)
+WHITE = (255, 255, 255)
+RED   = (255,   0,   0)
+GREEN = (  0, 255,   0)
+BLUE  = (  0,   0, 255)
+
+pygame.init()                       # start pygame
+background_color = BLACK            # kolor tla
+done  = True                        # zmienna odpowedzialna za petle
+clock = pygame.time.Clock()         # zegar  do czestotliwosci petli 
+pygame.joystick.init()              # start joysticka
+message    = " "                    # zmienna w ktorej bedzie zawartosc stanu joystika wysylana do robota
+tm         ="NULL"                  # zmienna w ktorej trzymana bedzie odpowiedz z robota 
+tmpSTR     = ""                     # zmienna pomocnicza 
+axies_now  = [0,0,0,0]                  # lista stanu polozenia kierownicy/joystickow
+button_now = [0,0,0,0,0,0,0,0,0,0,0,0]  # lista stanu przyciskow
+hats_now   = [0,0]                      # lista stanu "krzyzuka"
+my_FPS     = [0.00,0.00,0.00]       # zmienna potrzebna do wyliczania FPS
+my_siz     = (1200,800)             # rozmiar okna - aktualny
+my_siz_org = (1200,800)             # rozmiar okna- na starcie    
+my_x_plus  = 410                    # odchylanie polozenia zdjecia joysticka
+my_y_plus  = 410                    # odchylanie polozenia zdjecia joysticka
+my_x = my_siz_org[0] - my_x_plus    # polozenie djecia joysticka
+my_y = my_siz_org[1] - my_y_plus    # polozenie djecia joysticka
+my_font_title   = pygame.font.SysFont("Arial", 28,1,1)      # czciona tylulowa 
+my_title        = 'WiFi Robot control  ver 2.0 '            # tutul programu 
+my_title_render = my_font_title.render(my_title,1, WHITE)   # wyswietlanie tytulu 
+f_IP = True                                                 # czy szukac IP
+
+window = pygame.display.set_mode(my_siz_org,HWSURFACE|DOUBLEBUF|RESIZABLE)  # utworzenie okna
+pygame.mouse.set_visible(1)
+pygame.event.set_grab(0)
+window.fill(background_color)                           # wypełnienie okna kolorem 
+pygame.display.set_caption(my_title)                    # ustawiamy etykiete
+screen = pygame.display.get_surface()                   # pobieramy informacje o ekranie - tle
+
+while not done:
+    # ekran startowy 
+
+    func.print_value(screen ,"Press SPACE to START", "Impact", 90, WHITE, 200, 200)
+    pygame.display.update()
+
+    func.print_value(screen ,"Press SPACE to START", "Impact", 90, RED, 200, 200)
+    pygame.display.update()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                # on exit if running from IDLE.
+                pygame.quit()
+                sys.exit()
+            elif  event.key == pygame.K_SPACE:
+                done = True
+######  end while ###################################################
+my_art_BG = pygame.image.load('background2.png')       # ladowanie obraz z joypadem
+my_video_frame =  pygame.image.load('background2.png') 
+if len(sys.argv) >= 3 :             # argumenty ze startu 
+    host = sys.argv[1]
+    port = sys.argv[2]
+else:
+    print("adres i port domyslny ")
+    host = "192.168.43.78"
+    port = "8833"
+######## koniec IF ################################
+host_set = False                                        # zmienne pomocnicze 
+port_set = False            
+my_connect            =  c_connect.c_connect()          # obiekt polacznie tcp
+my_connection_status  = "NOT CONNECTED"                 # status polaczenia 
+button_connect        = Buttons.Button()                # przyciks  "polacz"
+button_connect_pos    = [my_siz[0]- 130 ,110]           # jego pozycja
+button_disconnect     = Buttons.Button()                # przycisk "odlacz"
+button_disconnect_pos = [my_siz[0]- 130 ,170]           # jego pozycja
+button_VIDEO          = Buttons.Button()                # przyciks  start Video
+button_VIDEO_pos      = [my_siz[0]- 250 ,230]           # jego pozycja
+button_VIDEO_name     = "START VIDEO"
+button_find           = Buttons.Button()                # przycisk "znajdz"
+button_find_pos       = [my_siz[0]- 130 ,230]           # jego pozycja
+dialog_box_host       = Buttons.dialog_box()            # ramka wpisania adresu hosta
+dialog_box_host_pos   = [my_siz[0]-300 ,300,300,30]     # pozycja
+dialog_box_host_color = background_color                # kolor
+dialog_box_port       = Buttons.dialog_box()            # jak wyzej   
+dialog_box_port_pos   = [my_siz[0]-200,340,150,30]
+dialog_box_port_color = background_color
+# polacznie   do odbioru video
+
+
+#             -------- Main Program Loop -----------
+
+done = False                                            # nie konczymy petli
+while not done:
+    # jakie eventy 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True                                 # koniec programu 
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                done = True                             # koniec programu
+            if host_set == True:
+                if event.key == pygame.K_BACKSPACE and len(host) > 0:
+                    host = host[:len(host)-1]                               # kasowanie znakow w hoscie
+                else:
+                    if event.key == pygame.K_RETURN and event.key != pygame.K_BACKSPACE:
+                        host_set = False
+                        dialog_box_host_color = background_color            # potwierdzenie wpisanego adresu
+                    else:
+                        host += chr(event.key)                              # wpisywanie adresu 
+            elif port_set == True:                                          # to samo tylko dla portu
+                if event.key == pygame.K_BACKSPACE and len(port) > 0:
+
+                    port = port[:len(port)-1]
+                else:
+                    if event.key == pygame.K_RETURN and event.key != pygame.K_BACKSPACE:
+                        port_set = False
+                        dialog_box_port_color = background_color
+                    else:
+                        port += chr(event.key)
+
+        elif event.type==VIDEORESIZE:
+            my_siz                 = event.dict['size']    # zmiana rozmiaru okna          
+            my_x                   = my_siz[0] - my_x_plus # przesuniecia przyciskow i okienek do wpisywania 
+            my_y                   = my_siz[1] - my_y_plus
+            button_connect_pos[0]  = my_siz[0]- 130
+            button_disconnect_pos[0] = my_siz[0]- 130
+            button_find_pos[0]     = my_siz[0]- 130
+            button_VIDEO_pos[0]    = my_siz[0]- 250
+            dialog_box_host_pos[0] = my_siz[0] -300
+            dialog_box_port_pos[0] = my_siz[0] -200
+            print (my_x)
+            print (my_y)
+            windows=pygame.display.set_mode(my_siz,HWSURFACE|DOUBLEBUF|RESIZABLE)
+            
+        elif event.type == MOUSEBUTTONDOWN:
+                if button_connect.pressed(pygame.mouse.get_pos()):                      # uzycie przycisku connect  zmiana jego koloru 
+                    button_connect.create_button(screen,BLUE, button_connect_pos[0], button_connect_pos[1], 110, 50, 10, "CONNECT", BLACK)
+                    pygame.display.update()
+                    if my_connect.is_work() == False:               # jesli nie polaczony to polacz 
+                        my_connection_status = my_connect.connect_to(host,int(port))
+                elif button_disconnect.pressed(pygame.mouse.get_pos()):             # to samo dla odlacz 
+                    button_disconnect.create_button(screen,BLUE, button_disconnect_pos[0], button_disconnect_pos[1], 110, 50, 10, "DISCONNECT", BLACK)
+                    pygame.display.update()
+                    if my_connect.is_work() == True:                        # jesli polacozny to odlacz 
+                        my_connection_status = my_connect.disconnect_now()
+                elif button_find.pressed(pygame.mouse.get_pos()):                   # to samo dla przycisku szukaj 
+                    button_find.create_button(screen,BLUE, button_find_pos[0], button_find_pos[1], 110, 50, 10, "DISCONNECT", BLACK)
+                    pygame.display.update()
+                    func.find_ip_start(host,int( port)) 
+                elif button_VIDEO.pressed(pygame.mouse.get_pos()):                   # to samo dla przycisku szukaj 
+                    button_VIDEO.create_button(screen,BLUE, button_VIDEO_pos[0], button_VIDEO_pos[1], 110, 50, 10, button_VIDEO_name, BLACK)
+                    if button_VIDEO_name == "START VIDEO":
+                        video_thread = threading.Thread(target=func.send_recv_JPG,args=("127.0.0.1", int(port)+1)) # video port zawsze wiekszy o jeden
+                        video_thread.start() 
+                        button_VIDEO_name = "STOP VIDEO" 
+                    elif button_VIDEO_name == "STOP VIDEO":
+                        button_VIDEO_name = "START VIDEO"
+                        
+                    
+                    pygame.display.update()                         
+                    # start procedury szukania  watki nowe i te sprawy 
+                # start wpisywania hosta  zmiana koloru
+                elif dialog_box_host.pressed(pygame.mouse.get_pos()) and port_set == False:
+                    host_set = True                             
+                    dialog_box_host_color = GREEN
+                # start wpisywania portu zmiana koloru
+                elif dialog_box_port.pressed(pygame.mouse.get_pos()) and host_set == False:
+                    port_set = True                               
+                    dialog_box_port_color = GREEN
+    # pobieranie ilosci joystickow
+    joystick_count = pygame.joystick.get_count()
+# czysczenie ekranu      
+    window.fill(background_color)                       
+        ########################## Video part 
+    if func.jpg_queue.empty() != True:
+        temp_frame = func.jpg_queue.get()
+        #plik = open('plik_do_zapisu.jpg', 'wb')
+        #plik.write(temp_frame)
+        #plik.close()
+        
+        #my_video_frame = pygame.image.load('plik_do_zapisu.jpg')
+        my_video_frame = pygame.image.frombuffer(temp_frame, (0,0),"RGB")
+        print "rysuje ramke!!"
+    
+    screen.blit(my_video_frame, (10,100))  
+    
+    
+    # przesuwanie zdjecia pada po ekranie 
+    if not pygame.mouse.get_pressed()[0]:
+        handle = False
+    if  pygame.mouse.get_pressed()[0]:
+        if   pygame.mouse.get_pos()[0] > my_x and pygame.mouse.get_pos()[0] < my_x + 400 and  pygame.mouse.get_pos()[1] > my_y and   pygame.mouse.get_pos()[1] < my_y +390 :
+            handle = True
+
+        if handle == True :
+            my_rel     = pygame.mouse.get_rel()
+            my_x       = my_x + my_rel[0]
+            my_x_plus -= my_rel[0]
+            my_y       = my_y + my_rel[1]
+            my_y_plus -= my_rel[1]
+    screen.blit(my_art_BG, (my_x,my_y))
+    # obsluga lewego joypada
+    if int(button_now[10]) == 1 :
+        #zmina koloru po jego wcisnieciu
+        pygame.draw.circle(window, RED, ((int(axies_now[0]) )/10 +my_x+145,(int(axies_now[1]) )/10+my_y+310), 25, 0)
+    else:
+        pygame.draw.circle(window, GREEN, ((int(axies_now[0]) )/10 +my_x+145,(int(axies_now[1]) )/10+my_y+310), 25, 0)
+
+    # wyswietlanie warotsci  wychylania 
+    func.print_value(screen ,str(axies_now[0]), "Impact", 12, BLUE, (int(axies_now[0]) )/10 +my_x+136, (int(axies_now[1]) )/10+my_y+310)
+    func.print_value(screen ,str(axies_now[1]), "Impact", 12, BLUE, (int(axies_now[0]) )/10 +my_x+140, (int(axies_now[1]) )/10+my_y+290)
+    
+    if int(button_now[11]) == 1 :
+        #pygame.draw.circle(window, RED, (  (int(axies_now[2]) )/10+my_x+462, (int(axies_now[3]) )/10+my_y+320), 25, 0)
+        pygame.draw.circle(window, RED, (  (int(axies_now[2]) )/10+my_x+268, (int(axies_now[3]) )/10+my_y+311), 25, 0)
+    else:
+        pygame.draw.circle(window, GREEN, (  (int(axies_now[2]) )/10+my_x+268, (int(axies_now[3]) )/10+my_y+311), 25, 0)
+
+    func.print_value(screen ,str(axies_now[2]), "Impact", 12, BLUE, (int(axies_now[2]) )/10 +my_x+262, (int(axies_now[3]) )/10+my_y+311)
+    func.print_value(screen ,str(axies_now[3]), "Impact", 12, BLUE, (int(axies_now[2]) )/10 +my_x+266, (int(axies_now[3]) )/10+my_y+291)
+    # rysoawnie uzycia przyciskow  - czerwone plamki 
+
+    if int(button_now[0]) == 1 :     #       522 - 205      232 -10
+        pygame.draw.circle(window, RED, (   my_x+327, my_y+222), 15, 0)
+    if int(button_now[1]) == 1 :
+        pygame.draw.circle(window, RED, (   my_x+359, my_y+252), 15, 0)
+    if int(button_now[2]) == 1 :
+        pygame.draw.circle(window, RED, (   my_x+326, my_y+282), 15, 0)
+    if int(button_now[3]) == 1 :
+        pygame.draw.circle(window, RED, (   my_x+290, my_y+252), 15, 0)
+    if int(button_now[4]) == 1 :
+        pygame.draw.rect(window, RED, (55+my_x, 75+my_y, 50 , 30))
+    if int(button_now[5]) == 1 :
+        pygame.draw.rect(window, RED, (308+my_x, 75+my_y, 50 , 30))
+    if int(button_now[6]) == 1 :
+        pygame.draw.rect(window, RED, (59+my_x, 20+my_y, 50 , 40))
+    if int(button_now[7]) == 1 :
+        pygame.draw.rect(window, RED, (310+my_x, 22+my_y, 50 , 40))
+    if int(button_now[8]) == 1 :
+        pygame.draw.rect(window, RED, (165+my_x, 246+my_y, 15 , 10))
+    if int(button_now[9]) == 1 :
+        pygame.draw.rect(window, RED, (231+my_x, 246+my_y, 15 , 10))
+    if hats_now[0]== 2:
+        pygame.draw.rect(window, RED, (55+my_x, 242+my_y, 20 , 20))
+    if hats_now[0]== 1:
+        pygame.draw.rect(window, RED, (97+my_x, 242+my_y, 20 , 20))
+    if hats_now[1]== 1:
+        pygame.draw.rect(window, RED, (77+my_x, 222+my_y, 20 , 20))
+    if hats_now[1]== 2:
+        pygame.draw.rect(window, RED, (77+my_x, 265+my_y, 20 , 20))
+    # wyswietlanie tytulu
+    screen.blit(my_title_render, (10,10))
+    # wysetlanie wiadomosci 
+    func.print_value(screen, "Message sent:     "+message, "Arial", 14, WHITE, 370,  10)
+    func.print_value(screen, "Message received: "+tm, "Arial", 14, WHITE, 370, 28)
+    # wysetlanie danych z myszki 
+    func.print_value(screen, str(pygame.mouse.get_rel()), "Arial", 14, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 50)
+    func.print_value(screen, str(pygame.mouse.get_pos()), "Arial", 14, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 65)
+    # wysetlanie statusu polaczenia  
+    func.print_value(screen, "CONNECTION: "+ my_connection_status, "Arial", 12, WHITE,    10, 50)
+    # wysetlanie ilosci klatek na sekunde 
+    func.print_value(screen, "FPS: "+str( my_FPS[0]), "Arial", 15, WHITE, my_siz[0] - (my_siz_org[0] - 1000), 80)
+    # wyswieltanie przyciskow 
+    button_find.create_button(screen,WHITE, button_find_pos[0], button_find_pos[1], 110, 50, 10, "FIND IP", BLACK)
+    button_VIDEO.create_button(screen,WHITE, button_VIDEO_pos[0], button_VIDEO_pos[1], 110, 50, 10, button_VIDEO_name, BLACK)
+    button_connect.create_button(screen,WHITE, button_connect_pos[0], button_connect_pos[1], 110, 50, 10, "CONNECT", BLACK)
+    button_disconnect.create_button(screen,WHITE, button_disconnect_pos[0], button_disconnect_pos[1], 110, 50, 10, "DISCONNECT", BLACK)
+    #    Wyswietlanie pol wprowadzania danych 
+    dialog_box_host.draw_box(dialog_box_host_pos,dialog_box_host_color,WHITE,"HOST: "+host,screen)
+    dialog_box_port.draw_box(dialog_box_port_pos,dialog_box_port_color,WHITE,"PORT: "+str(port),screen)
+    
+ 
+    pygame.display.update()
+
+    # petla odczytu dla jopadow 
+    for i in range(joystick_count):
+        joystick = pygame.joystick.Joystick(i)
+        joystick.init()
+
+        message="j:"+ str(i)+";"
+        # Get the name from the OS for the controller/joystick
+        name = joystick.get_name()
+        #print("Joystick name: %s" %name)
+
+        # Usually axis run in pairs, up/down for one, and left/right for
+        # the other.
+        axes = joystick.get_numaxes()
+        #print (  "Number of axes: %i" %axes)
+        message +="a"
+        for i in range(axes):
+            axis = joystick.get_axis(i)
+            message +=":"
+            tmpSTR = axies_now[i]= str(int(axis *255.6))
+            # wypelnie warotsci wychylenia osi  joyow do stalych 4 bajtow 
+            while len(tmpSTR) < 4:          
+                tmpSTR+=" "
+            message += tmpSTR
+                    
+        buttons = joystick.get_numbuttons()
+        #print ( "Number of buttons: %i "%buttons)
+
+        message+=";b"
+        for i in range(buttons):
+            button_now[i] = button = joystick.get_button(i)
+            message+=":"+str(button)
+        # Hat switch. All or nothing for direction, not like joysticks.
+        # Value comes back in an array.
+        hats = joystick.get_numhats()
+        #print ( "Number of hats: %i" %hats)
+
+        message+=";h"
+        for i in range(hats):
+            hat = joystick.get_hat(i)
+            hats_now[0] = hat[0]
+            hats_now[1] = hat[1]
+            # pozbywamy sie wartosci z '-'  dla stalej wielkosci ramki  zmiast -1 bedzie 2 
+            if hat[0] == -1  :
+                hats_now[0]=2
+            if hat[1] == -1  :
+                hats_now[1]=2
+            message+=":"+str(i)+"="+str(hats_now)
+
+        message+=";END#"              # koncowka ze znakeim '#' oznaczajacym koniec danych 
+        
+        message+=str(len(message))
+        # wysylanie 
+        my_connect.send(message)
+        # odbieranie
+        tm = my_connect.recv(256)
+    # koniec petli dla joysticka numer  n
+    # obliczanie FPS
+    my_FPS [1]+=1.00
+    if my_FPS [2]+1.00 < time.time():
+
+        my_FPS[0] = my_FPS[1]/(time.time() - my_FPS [2]   )
+        my_FPS[1] = 0.0
+        my_FPS[2] = time.time()
+        
+    # jesli jest znalezione IP w kolejce  to je pobierz 
+    if func.c_queue.empty() == False and f_IP == True :
+        print "mamy IP !!!!!"
+        f_IP = False
+        host = func.c_queue.get()
+        func.c_queue.put(host)
+    # ile razy na sekunde max ma rysowac ekran i czytac  stan padow 
+    #clock.tick(30)
+
+#koniec 
+pygame.quit()

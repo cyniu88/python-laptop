@@ -61,7 +61,7 @@ class dialog_box:
         print "kasuje obiekt"
     def draw_box (self,wher,color,color_txt,text,screen):
         self.rect = pygame.draw.rect(screen,color, wher)
-        func.print_value(screen,text,"Arial",wher[3] -(wher[3]/8),color_txt,wher[0],wher[1])
+        func.print_value(screen,text,"Arial",wher[3] -(wher[3]/6),color_txt,wher[0],wher[1])
     def pressed(self, mouse):
         if mouse[0] > self.rect.topleft[0]:
             if mouse[1] > self.rect.topleft[1]:

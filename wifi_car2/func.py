@@ -5,9 +5,13 @@ import socket
 import Queue
 import re
 import threading
+import c_connect
+from c_connect import c_connect_UDP
+#import cv2
 
-c_queue= Queue.Queue(2)     # kolejka  do trzymania znalezionego IP - odporna na wiele w¹tków 
-
+c_queue= Queue.Queue(2)     # kolejka  do trzymania znalezionego IP - odporna na wiele wï¿½tkï¿½w 
+jpg_queue = Queue.Queue(40) # kolejka do trzymania klatek video  w postaci jpg
+show_video_now = False
 # funkcja do wysetlania warotsci 
 def print_value (screen, text, _font, font_size, color, _x, _y):
     my_font_value = pygame.font.SysFont(_font, font_size)
@@ -43,9 +47,14 @@ def find_server (start, stop, host, port ):
     print "KONIEC!!: " + str(start) + " " + str(stop)
     return "NOT FOUND" 
 # funkcja   watek 
-def find_ip_start (port):
+def find_ip_start (host , port):
     # pobiera adres kienta   ( dzieki temu znamy adres sieci w jakiej pracuje klient i szukany serwer)
-    adres = extractIP(str(socket.gethostbyname(socket.gethostname())))   
+    if len(host) < 6 :
+        adres = extractIP(str(socket.gethostbyname(socket.gethostname())))
+    else:
+        adres = extractIP(str(socket.gethostbyname(host)))
+    print adres
+       
     c_thread = [0]   
     # przeszukujemy koncwke  adresow z sieci  ( bo jest mniejsza niz 10   - nie ma 260   tylko 255 )
     c_thread[0] = threading.Thread(target = find_server , args = (251,255,adres, port ))
@@ -55,4 +64,37 @@ def find_ip_start (port):
         c_thread.extend("0")   # poszerzamy liste watkow 
         c_thread[num] = threading.Thread(target = find_server , args = ((num-1)*10+1,num*10,adres, port ))
         c_thread[num].start()
+#####################################################     udp send recv JPG  ##############
+def cvimage_to_pygame(image):
+    """Convert cvimage into a pygame image"""
+    #image_rgb = cv2.CreateMat(image.height, image.width, cv2.CV_8UC3)
+    #cv2.CvtColor(image, image_rgb, cv2.CV_BGR2RGB)
+    #return pygame.image.frombuffer(image.tostring(), cv2.GetSize(image_rgb),"RGB")
+
+def send_recv_JPG (host,port):
+    # tworze obietkt
+    sock = c_connect.c_connect_UDP()   
+    # lacze sie z gniazdem 
+    sock.connect_to(host, port)
+    buffer_tmp=""                               # bufor odbioru
+    while sock.is_work():
+        while True:
+            sock.send("get_JPG", host, port)    # wyslanie prosby o ramke
+            #print "wyslalem"
+            data = sock.recv(65000)             # odbior ramki 
+            if data == "END#":                  # jesli END  to koniec odberania pojedynczje ramki 
+                #print "odebrlem koniec"
+                break                           # przerwanie
+                
+            buffer_tmp = buffer_tmp + data      # dopisanie danych do bufora 
         
+        #print " wielkosc buf", len(buffer_tmp)
+        jpg_queue.put(buffer_tmp)               # zaladowanie bufora do kolejki
+        buffer_tmp = ""                         # czyszczenie bufora
+        #print jpg_queue.qsize()
+        #print show_video_now
+        if  show_video_now == False:            # jesli koniec to zamknij watke
+            sock.disconnect_now(host, port)
+            print " odebralem ze chesz konczyc "
+            
+    print "Koniec watku"   

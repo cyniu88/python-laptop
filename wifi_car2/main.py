@@ -73,7 +73,7 @@ if len(sys.argv) >= 3 :             # argumenty ze startu
     port = sys.argv[2]
 else:
     print("adres i port domyslny ")
-    host = "127.0.0.1"
+    host = "192.168.43.182"
     port = "8833"
 ######## koniec IF ################################
 host_set = False                                        # zmienne pomocnicze 
@@ -347,6 +347,7 @@ while not done:
         
         message+=str(len(message))
         # wysylanie 
+        print message
         my_connect.send(message)
         # odbieranie
         tm = my_connect.recv(256)

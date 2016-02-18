@@ -39,14 +39,14 @@ while True:
         msg=" "
         while work:
                 for e in pygame.event.get() :
-                        
+
                         if e.type == pygame.QUIT :
                              sys.exit()
-                
+
                 # draw frame
 
                 # grab next frame
-                
+
                 img = webcam.get_image()
                 screen.blit(img, (0,0))
                 pygame.display.flip()
@@ -59,7 +59,7 @@ while True:
                 foto_len_tmp = 0 #foto_len
                 print "dlugosc to : ",foto_len
                 while work:
-        
+
                         data, addr = sock.recvfrom(max_size_pocket) # buffer size is 1024 bytes
                         if data == "END#":
                                  work = False

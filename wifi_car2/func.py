@@ -7,7 +7,7 @@ import re
 import threading
 import c_connect
 from c_connect import c_connect_UDP
-#import cv2
+import cv2
 
 c_queue= Queue.Queue(2)     # kolejka  do trzymania znalezionego IP - odporna na wiele w�tk�w 
 jpg_queue = Queue.Queue(40) # kolejka do trzymania klatek video  w postaci jpg
@@ -73,13 +73,13 @@ def cvimage_to_pygame(image):
 
 def send_recv_JPG (host,port):
     # tworze obietkt
-    sock = c_connect.c_connect_UDP()   
+    sock = c_connect.c_connect()   
     # lacze sie z gniazdem 
     sock.connect_to(host, port)
     buffer_tmp=""                               # bufor odbioru
     while sock.is_work():
         while True:
-            sock.send("get_JPG", host, port)    # wyslanie prosby o ramke
+            sock.send("get_JPG")    # wyslanie prosby o ramke
             #print "wyslalem"
             data = sock.recv(65000)             # odbior ramki 
             if data == "END#":                  # jesli END  to koniec odberania pojedynczje ramki 

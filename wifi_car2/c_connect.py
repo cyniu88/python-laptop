@@ -97,7 +97,7 @@ class c_connect_UDP :
     def connect_to (self,host, port):
 
         try:
-            self.c_socket =  socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.c_socket =  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error, msg :
        
             self.work = False
